@@ -761,9 +761,6 @@
     <div class="toast" id="toast"></div>
     
     <script>
-        // =============================================
-        // Firebase Initialization
-        // =============================================
         const firebaseConfig = {
             apiKey: "AIzaSyCGsv8lFGvKtbcEzmMcRuRhKelFSb-qblY",
             authDomain: "fial-84.firebaseapp.com",
@@ -772,15 +769,14 @@
             messagingSenderId: "524626884668",
             appId: "1:524626884668:web:cce5b7687790859b82ab39"
         };
-        
+
         firebase.initializeApp(firebaseConfig);
-        
+
         const auth = firebase.auth();
         const db = firebase.firestore();
-        
-        // =============================================
+    </script>
+    <script>
         // Firebase Auth Functions
-        // =============================================
         let currentUser = null;
         
         function loginWithGoogle() {
