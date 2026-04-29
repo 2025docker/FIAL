@@ -35,10 +35,13 @@
         .logo span { font-size: 10px; color: var(--gray-500); }
         .logo svg { width: 28px; height: 28px; }
         
-        @media (max-width: 640px) {
+        @media (max-width: 480px) {
             .logo svg { width: 24px; height: 24px; }
             .logo h1 { font-size: 16px; }
             .logo span { display: none; }
+        }
+        @media (max-width: 640px) and (min-width: 481px) {
+            .logo span { font-size: 11px; }
         }
         .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         
@@ -781,7 +784,28 @@
         
         function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider);
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                auth.signInWithRedirect(provider)
+                    .then(() => {
+                        console.log("Redirect login initiated");
+                    })
+                    .catch(error => {
+                        console.error("Login error:", error);
+                        alert("Login failed: " + error.message);
+                    });
+            } else {
+                auth.signInWithPopup(provider)
+                    .then(result => {
+                        console.log("Login success:", result.user.email);
+                        showToast("Login success");
+                    })
+                    .catch(error => {
+                        console.error("Login error:", error);
+                        alert("Login failed: " + error.message);
+                    });
+            }
         }
         
         function logout() {
@@ -790,17 +814,29 @@
         
         // Auth state listener
         auth.onAuthStateChanged(user => {
+            currentUser = user;
+
+            updateUIForAuth();
+
             if (user) {
-                console.log("Logged in:", user.uid);
-                currentUser = user;
-                updateUIForAuth();
                 loadData();
+                showToast("Logged in as " + (user.displayName || user.email));
             } else {
-                console.log("Not logged in");
-                currentUser = null;
-                updateUIForAuth();
+                showToast("Guest mode");
             }
         });
+        
+        // Handle redirect result on mobile return
+        auth.getRedirectResult()
+            .then(result => {
+                if (result.user) {
+                    console.log("Redirect login success:", result.user.email);
+                    showToast("Login success");
+                }
+            })
+            .catch(error => {
+                console.error("Redirect result error:", error);
+            });
         
         function updateUIForAuth() {
             const loginBtn = document.getElementById('loginBtn');
